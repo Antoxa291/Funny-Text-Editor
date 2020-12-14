@@ -1,19 +1,28 @@
 <template>
   <div class="wrapper">
     <div class="editor-form">
-      <div class="editor-form__btn-set">
-        <button>
+      <div id="toolBar" class="editor-form__btn-set">
+        <button @click="formatText('bold')">
           <b>B</b>
         </button>
-        <button><i>I</i></button>
-        <button><u>U</u></button>
+        <button @click="formatText('italic')"><i>I</i></button>
+        <button @click="formatText('underline')"><u>U</u></button>
         <button>Font color</button>
         <button>Font size</button>
-        <button>Background color</button>
+        <SelectBgColor
+          :options="bgColorOptions"
+          @selected-option="formatBgColor"
+        />
+        <Selector :options="bgColorOptions" @selected-option="formatBgColor" />
       </div>
       <div class="editor-form__main">
-        <div class="editor-form__textfild" contenteditable="true">
-          text...
+        <div
+          id="textBox"
+          class="editor-form__textfild"
+          contenteditable="true"
+          spellcheck="false"
+        >
+          <p>Enter Your text here...</p>
         </div>
         <i class="material-icons close"></i>
       </div>
@@ -21,7 +30,61 @@
   </div>
 </template>
 <script>
-export default {};
+import SelectBgColor from "./select-bg-color.vue";
+import Selector from "./selector.vue";
+
+export default {
+  name: "EditorForm",
+  components: {
+    SelectBgColor,
+    Selector,
+  },
+  data() {
+    return {
+      focusOnElement: "",
+      elementInnerText: "",
+      outputText: "",
+      bgColorOptions: [
+        { name: "Red", value: "red" },
+        { name: "Green", value: "green" },
+        { name: "Blue", value: "blue" },
+      ],
+      colorOptions: [
+        { name: "Red", value: "red" },
+        { name: "Green", value: "green" },
+        { name: "Blue", value: "blue" },
+      ],
+      sizeOptions: [
+        { name: "Small", value: "Very small" },
+        { name: "Normal", value: "Normal" },
+        { name: "Big", value: "Big" },
+      ],
+    };
+  },
+  props: {
+    activeEl: {
+      type: String,
+    },
+  },
+  computed: {},
+  mounted() {
+    // window.getSelection().toString();
+    this.focusOnElement = document.getElementById("textBox");
+    // document.designMode = "on";
+    this.elementInnerText = this.focusOnElement.innerHTML;
+  },
+  methods: {
+    formatText(selectedCommand, selectedValue) {
+      document.execCommand(selectedCommand, false, selectedValue);
+      this.focusOnElement.focus();
+    },
+    formatBgColor(selectedValue) {
+      console.log(selectedValue);
+      this.focusOnElement.focus();
+      document.execCommand("backcolor", false, selectedValue);
+    },
+  },
+};
 </script>
 <style lang="scss">
 .wrapper {
@@ -60,7 +123,7 @@ export default {};
   }
   &__textfild {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column wrap;
     justify-content: left;
     align-items: flex-start;
     position: relative;

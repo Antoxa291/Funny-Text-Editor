@@ -2,8 +2,8 @@
   <div id="app">
     <img class="logo" alt="Vue logo" src="@/assets/logo.png" />
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">Text Editor</router-link> |
+      <router-link to="/about">About Test task</router-link>
     </div>
     <router-view />
   </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <HelloWorld msg="Welcome to Your Funny Tex Editor!" />
+    <HelloWorld msg="Welcome to Your Funny Text Editor!" />
     <EditorForm />
   </div>
 </template>
