@@ -22,7 +22,7 @@ export default {
 <style lang="scss">
 .home {
   &__logo {
-    max-width: 50px;
+    max-width: 5rem;
   }
 }
 </style>

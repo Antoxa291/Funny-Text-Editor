@@ -1,155 +1,239 @@
 <template>
   <div class="wrapper">
-    <div class="editor-form">
-      <div id="toolBar" class="editor-form__btn-set">
-        <button @click="formatText('bold')">
+    <div class="editor">
+      <div class="editor__btn-set">
+        <button class="editor-btn" data-command="bold">
           <b>B</b>
         </button>
-        <button @click="formatText('italic')"><i>I</i></button>
-        <button @click="formatText('underline')"><u>U</u></button>
-        <button>Font color</button>
-        <button>Font size</button>
-        <SelectBgColor
-          :options="bgColorOptions"
-          @selected-option="formatBgColor"
-        />
-        <Selector :options="bgColorOptions" @selected-option="formatBgColor" />
+        <button class="editor-btn" data-command="italic"><i>I</i></button>
+        <button class="editor-btn" data-command="underline"><u>U</u></button>
+        <button class="editor-btn" data-command="justifyleft">left</button>
+        <button class="editor-btn" data-command="justifycenter">center</button>
+        <button class="editor-btn" data-command="justifyright">right</button>
       </div>
-      <div class="editor-form__main">
-        <div
-          id="textBox"
-          class="editor-form__textfild"
-          contenteditable="true"
-          spellcheck="false"
-        >
-          <p>Enter Your text here...</p>
+      <div class="editor__btn-set">
+        <Select
+          class="btn"
+          :title="selectorsTitle[0]"
+          :options="bgColorOptions"
+        />
+        <Select
+          class="btn"
+          :title="selectorsTitle[1]"
+          :options="colorOptions"
+        />
+        <Select class="btn" :title="selectorsTitle[2]" :options="sizeOptions" />
+      </div>
+      <emitExample @setInnerHTML="setDefaultInnerHTML" />
+      <button
+        class="btn btn__toggle"
+        id="toJson"
+        @click="isEditorVisible = !isEditorVisible"
+      >
+        <span v-if="isEditorVisible">toggle to JSON</span>
+        <span v-else>toggle to text</span>
+      </button>
+      <div
+        v-show="isEditorVisible"
+        class="editor__textfield"
+        id="textfield"
+        contenteditable="true"
+        spellcheck="false"
+      >
+        <div id="content">Enter your text here...</div>
+      </div>
+      <div v-show="!isEditorVisible" class="editor__textfield " id="jsonfield">
+        <div id="contentJSON" v-if="this.editorContentObjJSON.length">
+          {{ this.editorContentObjJSON }}
         </div>
-        <i class="material-icons close"></i>
+        <div id="contentNon" v-else>Get start to edit text!</div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import SelectBgColor from "./select-bg-color.vue";
-import Selector from "./selector.vue";
+import { mapActions, mapGetters } from "vuex";
+import Select from "@/components/Editor/select";
+import emitExample from "@/components/Editor/emitExample";
 
 export default {
-  name: "EditorForm",
-  components: {
-    SelectBgColor,
-    Selector,
-  },
+  name: "Editor",
+  components: { Select, emitExample },
+  props: {},
   data() {
     return {
-      focusOnElement: "",
-      elementInnerText: "",
-      outputText: "",
+      editorBtn: "",
+      editorContentObj: {},
+      editorContentObjJSON: {},
+      isEditorVisible: true,
+      selectorsTitle: ["background color", "text color", "text size"],
+
       bgColorOptions: [
-        { name: "Red", value: "red" },
-        { name: "Green", value: "green" },
-        { name: "Blue", value: "blue" },
+        { name: "White", command: "backcolor", attribute: "white" },
+        { name: "Red", command: "backcolor", attribute: "red" },
+        { name: "Green", command: "backcolor", attribute: "green" },
+        { name: "Blue", command: "backcolor", attribute: "blue" },
       ],
       colorOptions: [
-        { name: "Red", value: "red" },
-        { name: "Green", value: "green" },
-        { name: "Blue", value: "blue" },
+        { name: "Black", command: "forecolor", attribute: "black" },
+        { name: "Red", command: "forecolor", attribute: "red" },
+        { name: "Green", command: "forecolor", attribute: "green" },
+        { name: "Blue", command: "forecolor", attribute: "blue" },
       ],
       sizeOptions: [
-        { name: "Small", value: "Very small" },
-        { name: "Normal", value: "Normal" },
-        { name: "Big", value: "Big" },
+        { name: "Small", command: "fontsize", attribute: "1" },
+        { name: "Normal", command: "fontsize", attribute: "3" },
+        { name: "Big", command: "fontsize", attribute: "5" },
       ],
     };
   },
-  props: {
-    activeEl: {
-      type: String,
-    },
-  },
-  computed: {},
-  mounted() {
-    // window.getSelection().toString();
-    this.focusOnElement = document.getElementById("textBox");
-    // document.designMode = "on";
-    this.elementInnerText = this.focusOnElement.innerHTML;
+
+  computed: {
+    ...mapGetters(["CONTENT"]),
   },
   methods: {
-    formatText(selectedCommand, selectedValue) {
-      document.execCommand(selectedCommand, false, selectedValue);
-      this.focusOnElement.focus();
+    ...mapActions(["GET_CONTENT_FROM_API"]),
+    selectEditorElements() {
+      this.editorBtn = document.getElementsByClassName("editor-btn");
+      this.editorContentObj = document.getElementById("content");
     },
-    formatBgColor(selectedValue) {
-      console.log(selectedValue);
-      this.focusOnElement.focus();
-      document.execCommand("backcolor", false, selectedValue);
+    setAttribute(element) {
+      document.execCommand(
+        element.dataset.command,
+        false,
+        element.dataset.attribute
+      );
+      this.editorContentObj = document.getElementById("content");
+      const outputDivObj = this.htmlToJSON(this.editorContentObj);
+
+      if (outputDivObj.tagName == "DIV") {
+        this.editorContentObjJSON = JSON.stringify(outputDivObj);
+      }
     },
+    htmlToJSON({ tagName, childNodes, style }) {
+      let tag = {};
+
+      if (tagName) {
+        tag["tagName"] = tagName;
+      }
+
+      tag["children"] = [];
+
+      for (let i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].data) {
+          tag["children"].push({ outerText: childNodes[i].data });
+        } else {
+          tag["children"].push({ node: this.htmlToJSON(childNodes[i]) });
+        }
+      }
+
+      if (style.cssText) {
+        for (const key in style) {
+          if (key.length > 3 && key !== "cssText" && key !== "length") {
+            if (
+              style[key] !== "" &&
+              style[key] !== null &&
+              typeof style[key] !== "function"
+            ) {
+              tag[key] = style[key];
+            }
+          }
+        }
+      }
+
+      return tag;
+    },
+    setDefaultInnerHTML(defaultInner) {
+      document.getElementById("content").innerHTML = defaultInner;
+
+      if (defaultInner !== "") {
+        this.editorContentObj = document.getElementById("content");
+        const outputDivObj = this.htmlToJSON(this.editorContentObj);
+
+        if (outputDivObj.tagName == "DIV") {
+          this.editorContentObjJSON = JSON.stringify(outputDivObj);
+        }
+      }
+    },
+  },
+  mounted() {
+    // this.GET_CONTENT_FROM_API(); //method for getting data from API
+
+    this.editorBtn = document.getElementsByClassName("editor-btn");
+    this.editorContentObj = document.getElementById("content");
+
+    document.execCommand("StyleWithCSS", false, "useCss");
+    for (let i = 0; i < this.editorBtn.length; i++) {
+      this.editorBtn[i].addEventListener("click", () => {
+        this.setAttribute(this.editorBtn[i]);
+      });
+    }
+  },
+  beforeUnmount() {
+    for (let i = 0; i < this.editorBtn.length; i++) {
+      this.editorBtn[i].addEventListener("click", () => {
+        this.removeEventListener("click", this.hideSelect);
+      });
+    }
   },
 };
 </script>
 <style lang="scss">
 .wrapper {
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column;
   justify-content: space-around;
   align-items: center;
 
-  border-radius: 8px;
-  min-width: 380px;
-  min-block-size: 600px;
-
-  margin: 16px;
+  border-radius: 0.8rem;
+  margin: 1rem;
   background: #42b983;
-  box-shadow: 0 0 8px 0 #2c3e50;
+  box-shadow: 0 0 0.8rem 0 #2c3e50;
+  .btn__toggle {
+    width: 13rem;
+  }
 }
-.editor-form {
+.editor {
+  padding: 2rem;
+
   &__btn-set {
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-around;
-    // align-items: center;
-    min-width: 200px;
+    justify-content: center;
+    align-items: center;
+    padding: 0.8rem;
     box-sizing: border-box;
-    & button {
-      font-size: 16px;
-      &:hover {
-        cursor: pointer;
-        box-shadow: 0 0 8px 0 #2c3e50;
-      }
+    border-radius: 0.8rem;
+    & button:first-child {
+      border-bottom-left-radius: 0.8rem;
+      border-top-left-radius: 0.8rem;
+    }
+    & button:last-child {
+      border-bottom-right-radius: 0.8rem;
+      border-top-right-radius: 0.8rem;
     }
   }
-  &__main {
-    display: flex;
-    flex-flow: row nowrap;
-  }
-  &__textfild {
-    display: flex;
-    flex-flow: column wrap;
-    justify-content: left;
-    align-items: flex-start;
-    position: relative;
-    min-width: 318px;
-    min-block-size: 500px;
-    border-radius: 8px;
-    padding: 8px;
-    margin: 8px;
+
+  &__textfield {
+    text-align: left;
+    border-radius: 0.8rem;
+    padding: 1.5rem 1rem;
+    margin: 1.5rem 0;
     font-family: "Aleo", serif;
-    font-size: 20px;
-    box-shadow: 0 0 8px 0 #42b983;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    word-break: break-word;
+    box-shadow: 0 0 0.8rem 0 #42b983;
     background: #ffffff;
-    text-shadow: rgba(0, 0, 0, 0.2) 2px 2px 0px;
+    // text-shadow: rgba(0, 0, 0, 0.2) 0.2rem 0.2rem 0;
+    min-height: 30rem;
+    width: 100%;
+    max-width: 66rem;
     &:focus,
     &:active {
       outline: none;
-      box-shadow: 0 0 8px 0 #2c3e50;
+      box-shadow: 0 0 0.8rem 0 #2c3e50;
     }
-  }
-}
-
-.close {
-  color: red;
-  &:hover {
-    cursor: pointer;
-    text-shadow: rgba(255, 0, 0, 0.329) 2px 2px 0px;
   }
 }
 </style>

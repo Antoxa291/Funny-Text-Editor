@@ -17,7 +17,7 @@ export default {
 .hello {
   &__title {
     font-family: "Aleo", serif;
-    text-shadow: rgba(0, 0, 0, 0.2) 2px 2px 0px;
+    text-shadow: rgba(0, 0, 0, 0.2) 0.2rem 0.2rem 0rem;
   }
 }
 </style>
