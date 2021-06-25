@@ -188,7 +188,7 @@ export default {
   border-radius: 0.8rem;
   margin: 1rem;
   background: aquamarine;
-  box-shadow: 0 0 0.8rem 0 #2c3e50;
+  box-shadow: 0 0 0.8rem 0 red;
   .btn__toggle {
     width: 13rem;
   }
