@@ -72,24 +72,24 @@ export default {
         { name: "White", command: "backcolor", attribute: "white" },
         { name: "Red", command: "backcolor", attribute: "red" },
         { name: "Green", command: "backcolor", attribute: "green" },
-        { name: "Blue", command: "backcolor", attribute: "blue" },
+        { name: "Blue", command: "backcolor", attribute: "blue" }
       ],
       colorOptions: [
         { name: "Black", command: "forecolor", attribute: "black" },
         { name: "Red", command: "forecolor", attribute: "red" },
         { name: "Green", command: "forecolor", attribute: "green" },
-        { name: "Blue", command: "forecolor", attribute: "blue" },
+        { name: "Blue", command: "forecolor", attribute: "blue" }
       ],
       sizeOptions: [
         { name: "Small", command: "fontsize", attribute: "1" },
         { name: "Normal", command: "fontsize", attribute: "3" },
-        { name: "Big", command: "fontsize", attribute: "5" },
-      ],
+        { name: "Big", command: "fontsize", attribute: "5" }
+      ]
     };
   },
 
   computed: {
-    ...mapGetters(["CONTENT"]),
+    ...mapGetters(["CONTENT"])
   },
   methods: {
     ...mapActions(["GET_CONTENT_FROM_API"]),
@@ -154,7 +154,7 @@ export default {
           this.editorContentObjJSON = JSON.stringify(outputDivObj);
         }
       }
-    },
+    }
   },
   mounted() {
     // this.GET_CONTENT_FROM_API(); //method for getting data from API
@@ -175,7 +175,7 @@ export default {
         this.removeEventListener("click", this.hideSelect);
       });
     }
-  },
+  }
 };
 </script>
 <style lang="scss">
@@ -187,7 +187,7 @@ export default {
 
   border-radius: 0.8rem;
   margin: 1rem;
-  background: #42b983;
+  background: aquamarine;
   box-shadow: 0 0 0.8rem 0 #2c3e50;
   .btn__toggle {
     width: 13rem;
